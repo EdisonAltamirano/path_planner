@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>path_planning_system</name>
+  <name>path_planning</name>
   <version>0.0.0</version>
   <description>This package contains the PPS, which is designed to try different strategies to predict and avoid collisions in a multiple agent environment.</description>
 

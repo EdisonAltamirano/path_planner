@@ -2,7 +2,7 @@
   <!-- Arguments -->
   <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
   <arg name="tb_number"   default="1"/>
-  <arg name="map_file" default="$(find path_planning_system)/maps/paper/paper_polished.yaml"/>
+  <arg name="map_file" default="$(find path_planning)/maps/paper/paper_polished.yaml"/>
 
 
   <!-- Start positions and Prefix definitions -->
@@ -13,7 +13,7 @@
 
   <!-- gazebo -->
   <group ns = "tb3_$(arg tb_number)">
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find path_planning_system)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find path_planning)/urdf/turtlebot3_$(arg model).urdf.xacro" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
       <param name="publish_frequency" type="double" value="50.0" />
@@ -24,7 +24,7 @@
   
   <!-- move base -->
     <param name="tf_prefix" value="tb3_$(arg tb_number)" />
-    <include file="$(find path_planning_system)/launch/subsystems/amcl.launch">
+    <include file="$(find path_planning)/launch/subsystems/amcl.launch">
 		  <arg name="tf_prefix" value="tb3_$(arg tb_number)"/>
 		  <arg name="scan_topic" value="scan" />
 		  <arg name="use_map_topic" value="true" />
@@ -33,6 +33,6 @@
 		  <arg name="initial_pose_a" value="$(arg orient)" />
 		  <arg name="global_frame_id" value="/map"/>
     </include>
-    <include file="$(find path_planning_system)/launch/subsystems/move_base.launch"/>
+    <include file="$(find path_planning)/launch/subsystems/move_base.launch"/>
   </group>
 </launch>

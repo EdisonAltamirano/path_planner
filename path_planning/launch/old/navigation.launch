@@ -4,7 +4,7 @@
   <!-- run amcl and move base for the three turtlebots -->
   <group ns="tb3_0">
     <param name="tf_prefix" value="tb3_0" />
-    <include file="$(find path_planning_system)/launch/subsystems/amcl.launch"> 
+    <include file="$(find path_planning)/launch/subsystems/amcl.launch"> 
 		<arg name="tf_prefix" value="tb3_0"/>
 		<arg name="scan_topic" value="scan" />
 		<arg name="use_map_topic" value="true" />
@@ -13,12 +13,12 @@
 		<arg name="initial_pose_a" value="0.0" />
 		<arg name="global_frame_id" value="/map"/>
     </include>
-    <include file="$(find path_planning_system)/launch/subsystems/move_base.launch"/>
+    <include file="$(find path_planning)/launch/subsystems/move_base.launch"/>
   </group>
 
   <group ns="tb3_1">
     <param name="tf_prefix" value="tb3_1" />
-    <include file="$(find path_planning_system)/launch/subsystems/amcl.launch"> 
+    <include file="$(find path_planning)/launch/subsystems/amcl.launch"> 
 		<arg name="tf_prefix" value="tb3_1"/>
 		<arg name="scan_topic" value="scan" />
 		<arg name="use_map_topic" value="true" />
@@ -27,12 +27,12 @@
 		<arg name="initial_pose_a" value="0.0" />
 		<arg name="global_frame_id" value="/map"/>
     </include>
-    <include file="$(find path_planning_system)/launch/subsystems/move_base.launch"/>
+    <include file="$(find path_planning)/launch/subsystems/move_base.launch"/>
   </group>
 
   <group ns="tb3_2">
     <param name="tf_prefix" value="tb3_2" />
-    <include file="$(find path_planning_system)/launch/subsystems/amcl.launch"> 
+    <include file="$(find path_planning)/launch/subsystems/amcl.launch"> 
 		<arg name="tf_prefix" value="tb3_2"/>
 		<arg name="scan_topic" value="scan" />
 		<arg name="use_map_topic" value="true" />
@@ -41,7 +41,7 @@
 		<arg name="initial_pose_a" value="0.0" />
 		<arg name="global_frame_id" value="/map"/>
     </include>
-    <include file="$(find path_planning_system)/launch/subsystems/move_base.launch"/>
+    <include file="$(find path_planning)/launch/subsystems/move_base.launch"/>
   </group>
 
 </launch>

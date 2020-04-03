@@ -1,9 +1,9 @@
 <launch>
-    <include file="$(find path_planning_system)/launch/dynamic_call/dynamic_gazebo_map_rviz.launch">
+    <include file="$(find path_planning)/launch/dynamic_call/dynamic_gazebo_map_rviz.launch">
       <arg name="rviz_config" value="path_test"/>
     </include>
-    <include file="$(find path_planning_system)/launch/dynamic_call/dynamic_spawn.launch"/>
-    <node name="path_server_global_planner" pkg="path_planning_system" type="path_server_global_planner" output="screen" >
-      <rosparam file="$(find path_planning_system)/config/test/costmap_example.yaml" command="load" ns="costmap" />
+    <include file="$(find path_planning)/launch/dynamic_call/dynamic_spawn.launch"/>
+    <node name="path_server_global_planner" pkg="path_planning" type="path_server_global_planner" output="screen" >
+      <rosparam file="$(find path_planning)/config/test/costmap_example.yaml" command="load" ns="costmap" />
     </node>
 </launch>
