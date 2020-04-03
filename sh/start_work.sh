@@ -1,5 +1,5 @@
 #!/bin/bash
 time=$(date)
 echo $time
-echo $time >>  ../documentation/work_times.txt
+echo $time >>  ~/catkin_ws/src/path_planning_system/documentation/work_times.txt
 git pull origin master
