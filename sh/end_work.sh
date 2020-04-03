@@ -2,7 +2,7 @@
 echo byebye
 time=$(date)
 echo "termination time: ${time}"
-echo "end ${time}" >> work_times.txt
+echo "end ${time}" >> ../documentation/work_times.txt
 git add .
 read -p "github comment: " comment
 git commit -m "${comment}"
