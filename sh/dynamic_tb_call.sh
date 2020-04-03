@@ -15,8 +15,8 @@ if [ $number -le 0 -o $number -ge 9 ]
         exit  255
 fi
 #this scripts writes a rviz config file
-./dynamic_rviz_config.sh $number
-roslaunch path_planning_system dynamic_gazebo_map_rviz.launch &
+./sh/dynamic_rviz_config.sh $number
+roslaunch path_planning dynamic_gazebo_map_rviz.launch &
 sleep 5s
 #warning gives the possibility to stop the process
 if ! zenity --warning --text "$number robots are spawned!" 2> /dev/null; then
@@ -27,7 +27,7 @@ fi
 counter=1
 while [ $counter -le $number ]
 do
-    roslaunch path_planning_system dynamic_spawn.launch tb_number:=$counter y_pos:=${y_pos[$counter]} &
+    roslaunch path_planning dynamic_spawn.launch tb_number:=$counter y_pos:=${y_pos[$counter]} &
     sleep 5s
     ((counter++))
 done

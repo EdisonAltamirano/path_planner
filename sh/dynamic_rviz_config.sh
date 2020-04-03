@@ -93,7 +93,7 @@ Visualization Manager:
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: true" > /home/valo/catkin_ws/src/timeflow/path_planning_system/config/dynamic.rviz
+      Value: true" > ~/catkin_ws/src/path_planning_system/path_planning/config/dynamic.rviz
 #loop to create the part for every resource
 counter=1
 while [ $counter -le $number ]
@@ -284,7 +284,7 @@ do
           Unreliable: false
           Value: true
       Enabled: true
-      Name: tb3_${counter}" >> /home/valo/catkin_ws/src/timeflow/path_planning_system/config/dynamic.rviz
+      Name: tb3_${counter}" >> ~/catkin_ws/src/path_planning_system/path_planning/config/dynamic.rviz
         ((counter++))
 done
 
@@ -345,7 +345,7 @@ Window Geometry:
   Width: 1855
   X: 65
   Y: 24
-" >> /home/valo/catkin_ws/src/timeflow/path_planning_system/config/dynamic.rviz
+" >> ~/catkin_ws/src/path_planning_system/path_planning/config/dynamic.rviz
 
 echo "finished.
 dynamic rviz config ready"
