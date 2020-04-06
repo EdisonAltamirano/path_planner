@@ -150,6 +150,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(path_server_global_planner src/server/path_server_global_planner.cpp)
 add_executable(path_server_navfn src/server/path_server_navfn.cpp)
+add_executable(time_server src/server/time_server.cpp)
+
 add_executable(path_server_test src/test/path_server_test.cpp)
 add_executable(time_server_test src/test/time_server_test.cpp)
 
@@ -162,8 +164,12 @@ add_executable(time_server_test src/test/time_server_test.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#SERVER
 add_dependencies(path_server_global_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(path_server_navfn ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(time_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#TEST
 add_dependencies(path_server_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(time_server_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -178,6 +184,10 @@ target_link_libraries(path_server_global_planner
 target_link_libraries(path_server_navfn
   ${catkin_LIBRARIES}
 )
+target_link_libraries(time_server
+  ${catkin_LIBRARIES}
+)
+
 target_link_libraries(path_server_test
   ${catkin_LIBRARIES}
 )
