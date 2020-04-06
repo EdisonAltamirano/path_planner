@@ -1,4 +1,6 @@
 <launch>
-    <include file="$(find path_planning)/launch/subsystems/gazebo.launch"/>
-    <include file="$(find path_planning)/launch/subsystems/navigation.launch"/>
+    <include file="$(find path_planning)/launch/dynamic_call/dynamic_gazebo_map_rviz.launch">
+      <arg name="rviz_config" value="path_test"/>
+    </include>
+    <include file="$(find path_planning)/launch/dynamic_call/dynamic_spawn.launch"/>
 </launch>
