@@ -1,5 +1,11 @@
+//Chief Executive Actionserver
+//Handles the organization and storage of the path schedule for a dynamic number of robots
+//Middleware connected with the time_ and path_server
+#include "ros/ros.h"
+#include "path_planning/time_service.h"
+#include "path_planning/path_service.h"
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include "nav_msgs/Path.h"
-#include "filename.h"
 
 
 class path_database
@@ -22,6 +28,8 @@ class path_database
         read
         update
         delete*/
+
+        bool create_path()
 
         bool create_path_entry(nav_msgs::Path path, int robot_id)
         {
