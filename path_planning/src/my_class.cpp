@@ -1,4 +1,4 @@
-#include "my_class.h" // header in local directory
+#include "database/my_class.h" // header in local directory
 #include <ros/ros.h>
 
 using namespace N;

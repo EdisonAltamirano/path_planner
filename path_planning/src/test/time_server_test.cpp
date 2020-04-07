@@ -3,6 +3,10 @@
 #include "path_planning/path_service.h"
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <stdlib.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#include <actionlib/client/simple_action_client.h>
+
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
 int main(int argc, char **argv)
 {
@@ -17,9 +21,19 @@ int main(int argc, char **argv)
     path_planning::time_service tsrv;
     path_planning::path_service psrv;
 
+    MoveBaseClient ac("/tb3_1/move_base", true);
+
+    //wait for the action server to come up
+    while(!ac.waitForServer(ros::Duration(5.0))){
+        ROS_INFO("Waiting for the move_base action server to come up");
+    }
+
+    move_base_msgs::MoveBaseGoal goal;
+
     boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> sharedPose;
     geometry_msgs::PoseWithCovarianceStamped pose_curr;
     sharedPose = ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>("/tb3_1/amcl_pose",n);
+
     if(sharedPose != NULL){
         pose_curr = *sharedPose;
     }
@@ -42,11 +56,19 @@ int main(int argc, char **argv)
         ROS_INFO("Path server failed.");
         return 1;
     }
+
+    while(psrv.response.path.poses.size() == 0)
+    {
+        psrv.request.goal.pose.position.x = rand() % 6;
+        psrv.request.goal.pose.position.y = rand() % 6;
+        ROS_INFO("[x] %f, [y] %f", psrv.request.goal.pose.position.x, psrv.request.goal.pose.position.y);
+        pclient.call(psrv);
+    }
     
     //server call
     tsrv.request.path = psrv.response.path;
     tsrv.request.startTime = ros::Time::now().toSec();
-    tsrv.request.average_velocity = 0.5;
+    tsrv.request.average_velocity = 0.002;
 
     if(client.call(tsrv))
     {
@@ -56,7 +78,24 @@ int main(int argc, char **argv)
         ROS_INFO("Time server failed.");
         return 1;
     }
-    
+
+    goal.target_pose.header.frame_id = "map";
+    goal.target_pose.header.stamp = ros::Time::now();
+    //Moving to the start position
+    goal.target_pose.pose.position.x = psrv.request.goal.pose.position.x;
+    goal.target_pose.pose.position.y = psrv.request.goal.pose.position.y;
+    goal.target_pose.pose.orientation.z = 0.0;
+    goal.target_pose.pose.orientation.w = 1.0;
+
+    ROS_INFO("moving to the goal position");
+    ac.sendGoal(goal);
+
+    ac.waitForResult();
+
+    if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+        ROS_INFO("End time(empirically): %lf", ros::Time::now().toSec());
+    else
+        ROS_INFO("The base failed to move forward 1 meter for some reason");
 
     while(ros::ok()){
         ros::spinOnce();

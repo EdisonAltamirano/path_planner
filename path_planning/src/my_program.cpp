@@ -1,5 +1,5 @@
 // my_program.cpp
-#include "my_class.h"
+#include "database/my_class.h"
 
 using namespace N;
 
