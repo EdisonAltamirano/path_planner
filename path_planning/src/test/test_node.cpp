@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     ROS_INFO("Walltime: %lf, Rostime: %lf", ros::WallTime::now().toSec(), ros::Time::now().toSec());
 
-    ros::Rate sleepy(1);
+    ros::Rate sleepy(0.5);
     while (ros::ok())
     {
             ROS_INFO("Walltime: %lf, Rostime: %lf", ros::WallTime::now().toSec(), ros::Time::now().toSec());
