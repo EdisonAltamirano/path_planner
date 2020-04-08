@@ -25,39 +25,60 @@ class path_database
             
         }
 
-        /*CRUD
+        /*
+        CRUD
         create
         read
         update
-        delete*/
+        delete
+        */
 
         bool new_path(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
         {
             return true;
         }
 
+
+        //random path generator on a random resource with a random start and goal position
         bool random_test_path()
         {
-            srand(time(NULL));
             geometry_msgs::PoseStamped start, goal;
-            start.header.frame_id = "map";
-            start.pose.position.x = rand() % 6;
-            start.pose.position.y = rand() % 6;
-            start.header.stamp = ros::Time::now();
-            goal.header.frame_id = "map";
-            goal.pose.position.x = rand() % 6;
-            goal.pose.position.y = rand() % 6;
+            start = random_pose_stamped();
+            goal = random_pose_stamped();
             nav_msgs::Path path = createPath(start, goal);
-            if(path.poses.size() <= 0)
-                return false;
-            path_database_[rand() % number_robots_].push_back(path);
+
+            for (int i = 0; i < 10; i++)
+            {
+                if(path.poses.size() > 0)
+                {
+                    path_database_[rand() % number_robots_].push_back(path);
+                    return true;
+                }
+                start = random_pose_stamped();
+                goal = random_pose_stamped();   
+                path = createPath(start, goal);    
+            }
+            return false;
+        }
+
+        //Display the scheduled paths
+        bool read_schedule()
+        {
+            for (int i = 0; i < number_robots_; i++)
+            {
+                for (int j = 0; j < path_database_[i].size(); j++)
+                {
+                    ROS_INFO("Robot %u Path %u Start [x] %.2lf [y] %.2lf Goal [x] %.2lf [y] %.2lf Size %u",
+                     i, j, path_database_[i][j].poses.front().pose.position.x, path_database_[i][j].poses.front().pose.position.y, path_database_[i][j].poses.back().pose.position.x, path_database_[i][j].poses.back().pose.position.y, path_database_[i][j].poses.size());
+                }   
+            }
             return true;
-      
         }
 
     private:
 
         int number_robots_;
+        int area_bound_ = 6;
         std::vector<std::vector<nav_msgs::Path> > path_database_;
         ros::NodeHandle n;
         ros::ServiceClient path_client_ = n.serviceClient<path_planning::path_service>("path_service");
@@ -81,6 +102,31 @@ class path_database
                 nav_msgs::Path fail;
                 return fail;
             }
+
+        }
+
+        //random pose generation for automated test process
+        geometry_msgs::PoseStamped random_pose_stamped()
+        {
+            geometry_msgs::PoseStamped random_pose;
+            srand(time(NULL));
+            random_pose.header.stamp = ros::Time::now();
+            random_pose.header.frame_id = "map";
+            random_pose.pose.position.x = rand() % area_bound_;
+            random_pose.pose.position.y = rand() % area_bound_;
+            return random_pose;
+        }
+
+        //find the start pose for paths depending on the schedule of the resource
+        geometry_msgs::PoseStamped start_pose_detection(int resource_id, float start_time)
+        {
+            float chrono_distance;
+            for (int i = 0; i < path_database_[resource_id].size(); i++)
+            {
+                
+            }
+            
+            
         }
 
 
@@ -89,20 +135,24 @@ class path_database
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "chief_executing_test");
+    ros::init(argc, argv, "database_actionserver_test");
     ros::NodeHandle n;
 
     path_database pdb(3);
-    if(pdb.random_test_path())
+    for (int i = 0; i < 5; i++)
     {
-        ROS_INFO("Sucessssss!");
-    }
-    else
-    {
-        ROS_INFO("Fail!");
+        if(pdb.random_test_path())
+        {
+            pdb.read_schedule();
+            ROS_INFO("Sucess!");
+        }
+        else
+        {
+            ROS_INFO("Fail!");
+        }
     }
 
-    ros::spin();
+    //ros::spin();
 
     return 0;
 }
