@@ -51,37 +51,23 @@ class path_database
         }
 
         //random path generator on a random resource with a random start and goal position
-        bool randomStartTestPath()
-        {
-            geometry_msgs::PoseStamped start, goal;
-            srand(time(NULL));
-            start = random_pose_stamped();
-            goal = random_pose_stamped();
-            nav_msgs::Path path = createPath(start, goal);
-
-            for (int i = 0; i < 10; i++)
-            {
-                if(path.poses.size() > 0)
-                {
-                    path_database_[rand() % number_robots_].push_back(path);
-                    return true;
-                }
-                start = random_pose_stamped();
-                goal = random_pose_stamped();   
-                path = createPath(start, goal);    
-            }
-            return false;
-        }
-
-        bool randomPosteriorPath()
+        bool randomTestPath()
         {
             geometry_msgs::PoseStamped start, goal;
             srand(time(NULL));
             int robot_id = rand() % number_robots_;
-            start = path_database_[robot_id].back().poses.back();
-            start.header.stamp = ros::Time::now();
+            //if the robot has no planned paths use the start position, otherwise use the last position of the last planned path
+            if(path_database_[robot_id].empty())
+            {
+                start.pose.position.x = 0;
+                start.pose.position.y = robot_id; 
+            }
+            else
+            {
+                start = path_database_[robot_id].back().poses.back();
+            }
             goal = random_pose_stamped();
-            nav_msgs::Path path = createPath(start, goal);
+            nav_msgs::Path path = newPath(start, goal, ros::Time::now().toSec());
 
             for (int i = 0; i < 10; i++)
             {
@@ -91,11 +77,11 @@ class path_database
                     return true;
                 }
                 goal = random_pose_stamped();   
-                path = createPath(start, goal);    
+                path = newPath(start, goal, ros::Time::now().toSec());    
             }
             return false;
-
         }
+
 
         //Display the scheduled paths
         bool read_schedule()
@@ -104,8 +90,8 @@ class path_database
             {
                 for (int j = 0; j < path_database_[i].size(); j++)
                 {
-                    ROS_INFO("Robot %u Path %u Start [x] %.2lf [y] %.2lf Goal [x] %.2lf [y] %.2lf Size %u",
-                     i, j, path_database_[i][j].poses.front().pose.position.x, path_database_[i][j].poses.front().pose.position.y, path_database_[i][j].poses.back().pose.position.x, path_database_[i][j].poses.back().pose.position.y, path_database_[i][j].poses.size());
+                    ROS_INFO("Robot %u Path %u Start [x] %.2lf [y] %.2lf Goal [x] %.2lf [y] %.2lf Size %4u [start_time] %4.2lf [end_time] %4.2lf",
+                     i, j, path_database_[i][j].poses.front().pose.position.x, path_database_[i][j].poses.front().pose.position.y, path_database_[i][j].poses.back().pose.position.x, path_database_[i][j].poses.back().pose.position.y, path_database_[i][j].poses.size(), path_database_[i][j].poses.front().header.stamp.toSec(), path_database_[i][j].poses.back().header.stamp.toSec());
                 }   
             }
             return true;
@@ -115,10 +101,20 @@ class path_database
 
         int number_robots_;
         int area_bound_ = 6;
+        float average_velocity_ = 0.1;
         std::vector<std::vector<nav_msgs::Path> > path_database_;
         ros::NodeHandle n;
         ros::ServiceClient path_client_ = n.serviceClient<path_planning::path_service>("path_service");
         ros::ServiceClient time_client_ = n.serviceClient<path_planning::time_service>("time_service");
+
+        nav_msgs::Path newPath(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal, float start_time)
+        {
+            nav_msgs::Path path;
+            path = createPath(start, goal);
+            if(path.poses.empty())return path;
+            path = timestampPath(path, start_time);
+            return path;
+        }
 
         nav_msgs::Path createPath(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
         {
@@ -135,6 +131,28 @@ class path_database
                 return p_srv.response.path;
             } else {
                 ROS_INFO("Path server failed.");
+                nav_msgs::Path fail;
+                return fail;
+            }
+
+        }
+
+        nav_msgs::Path timestampPath(nav_msgs::Path path, float start_time)
+        {
+            path_planning::time_service t_srv;
+
+            t_srv.request.startTime = start_time;
+            t_srv.request.average_velocity = average_velocity_;
+            t_srv.request.path = path;
+
+            if(time_client_.call(t_srv))
+            {
+                ROS_INFO("Time server succeeded. [start_time] %f [end_time] %f", t_srv.response.path_timestamped.poses.front().header.stamp.toSec(), t_srv.response.path_timestamped.poses.back().header.stamp.toSec());
+                return t_srv.response.path_timestamped;
+            }
+            else
+            {
+                ROS_ERROR("Time server failed.");
                 nav_msgs::Path fail;
                 return fail;
             }
@@ -175,26 +193,9 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
     path_database pdb(3);
-    geometry_msgs::PoseStamped start, goal;
-    start.pose.position.x = 0;
-    start.pose.position.y = 0;
-    goal.pose.position.x = 1;
-    goal.pose.position.y = 1;
-    pdb.createPathIDTimeStartGoal( 0, ros::Time::now().toSec(), start, goal);
-    start.pose.position.x = 0;
-    start.pose.position.y = 1;
-    goal.pose.position.x = 2;
-    goal.pose.position.y = 1;
-    pdb.createPathIDTimeStartGoal( 1, ros::Time::now().toSec(), start, goal);
-    start.pose.position.x = 0;
-    start.pose.position.y = 2;
-    goal.pose.position.x = 1;
-    goal.pose.position.y = 2;
-    pdb.createPathIDTimeStartGoal( 2, ros::Time::now().toSec(), start, goal);
-
     for (int i = 0; i < 5; i++)
     {
-        if(pdb.randomPosteriorPath())
+        if(pdb.randomTestPath())
         {
             pdb.read_schedule();
             ROS_INFO("Sucess!");
