@@ -33,16 +33,28 @@ class path_database
         delete
         */
 
-        bool new_path(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
+        bool dummySchedule(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
         {
             return true;
         }
 
+        //path with time and id
+        bool createPathIDTimeStartGoal(int robot_id, float start_time, geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
+        {
+            path_database_[robot_id].push_back(createPath(start, goal));
+            if(path_database_[robot_id].back().poses.size()==0)
+            {
+                ROS_ERROR("Path is empty.(createPathIDTimeStartGoal)");
+                return false;
+            }
+            return true;
+        }
 
         //random path generator on a random resource with a random start and goal position
-        bool random_test_path()
+        bool randomStartTestPath()
         {
             geometry_msgs::PoseStamped start, goal;
+            srand(time(NULL));
             start = random_pose_stamped();
             goal = random_pose_stamped();
             nav_msgs::Path path = createPath(start, goal);
@@ -59,6 +71,30 @@ class path_database
                 path = createPath(start, goal);    
             }
             return false;
+        }
+
+        bool randomPosteriorPath()
+        {
+            geometry_msgs::PoseStamped start, goal;
+            srand(time(NULL));
+            int robot_id = rand() % number_robots_;
+            start = path_database_[robot_id].back().poses.back();
+            start.header.stamp = ros::Time::now();
+            goal = random_pose_stamped();
+            nav_msgs::Path path = createPath(start, goal);
+
+            for (int i = 0; i < 10; i++)
+            {
+                if(path.poses.size() > 0)
+                {
+                    path_database_[robot_id].push_back(path);
+                    return true;
+                }
+                goal = random_pose_stamped();   
+                path = createPath(start, goal);    
+            }
+            return false;
+
         }
 
         //Display the scheduled paths
@@ -139,9 +175,26 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
     path_database pdb(3);
+    geometry_msgs::PoseStamped start, goal;
+    start.pose.position.x = 0;
+    start.pose.position.y = 0;
+    goal.pose.position.x = 1;
+    goal.pose.position.y = 1;
+    pdb.createPathIDTimeStartGoal( 0, ros::Time::now().toSec(), start, goal);
+    start.pose.position.x = 0;
+    start.pose.position.y = 1;
+    goal.pose.position.x = 2;
+    goal.pose.position.y = 1;
+    pdb.createPathIDTimeStartGoal( 1, ros::Time::now().toSec(), start, goal);
+    start.pose.position.x = 0;
+    start.pose.position.y = 2;
+    goal.pose.position.x = 1;
+    goal.pose.position.y = 2;
+    pdb.createPathIDTimeStartGoal( 2, ros::Time::now().toSec(), start, goal);
+
     for (int i = 0; i < 5; i++)
     {
-        if(pdb.random_test_path())
+        if(pdb.randomPosteriorPath())
         {
             pdb.read_schedule();
             ROS_INFO("Sucess!");
