@@ -71,6 +71,38 @@ class path_database
             }
         }
 
+        //CRUD operation - update: Update the posterior paths. Provisionally just updating the next path.
+        bool updatePath(int robot_id, int path_id)
+        {
+            nav_msgs::Path path;
+            geometry_msgs::PoseStamped start;
+            if(path_id == 0)
+            {
+                start.pose.position.x = robot_id;
+                start.pose.position.y = 0;
+            }
+            else
+            {
+                start = path_database_[robot_id][path_id - 1].poses.back();
+            }
+            path = newPath(start, path_database_[robot_id][path_id].poses.back(), path_database_[robot_id][path_id].poses.front().header.stamp.toSec());
+            if(path.poses.empty())
+                return false;
+            path_database_[robot_id][path_id] = path;
+            return true;
+        }
+
+        //CRUD operation - delete: Delete the path and update the remaining queue.
+        bool deletePath(int robot_id, int path_id)
+        {
+            path_database_[robot_id].erase(path_database_[robot_id].begin() + path_id);
+            if(path_database_[robot_id].size() > path_id)
+            {
+                ROS_INFO("updating the path.");
+                updatePath(robot_id, path_id);
+            }
+        }
+
         //path with time and id
         bool planPathIDTimeStartGoal(int robot_id, float start_time, geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
         {
@@ -235,6 +267,9 @@ int main(int argc, char **argv)
             ROS_INFO("Fail!");
         }
     }
+
+    pdb.deletePath(1, 0);
+    pdb.searchPath();
 
     //ros::spin();
 
