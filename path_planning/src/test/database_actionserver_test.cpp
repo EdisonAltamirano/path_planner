@@ -36,10 +36,31 @@ class path_database
         //CRUD operation - create: Creates a path and distributes it with a priority system
         bool createPath(geometry_msgs::PoseStamped goal, float start_time)
         {
-            ROS_INFO("which resource should take the task %d", checkPriority(goal, start_time));
-            //TODO start pose 
-            //TODO newPath(start, goal, start_time)
+            int position, robot_id = checkPriority(goal, start_time);
+            geometry_msgs::PoseStamped start;
+            nav_msgs::Path path;
+            ROS_INFO("which resource should take the task %d", robot_id);
+            start = searchStartPose(robot_id, start_time);
+            ROS_INFO("start: [x] %.2lf [y] %.2lf", start.pose.position.x, start.pose.position.y);
+            position = checkPosition(robot_id, start_time);
+            ROS_INFO("position %d", position);
+            path = newPath(start, goal, start_time);
+            if(path.poses.empty())
+                return false;
+            path_database_[robot_id].insert(path_database_[robot_id].begin() + position, path);
+            if(path_database_[robot_id].size() > position)
+            {
+                 return updatePath(robot_id, position);
+            }
             return true;
+        }
+
+        bool createPathTest()
+        {
+            srand(time(NULL));
+            float time = rand() % 2000;
+            geometry_msgs::PoseStamped goal = random_pose_stamped();
+            return createPath(goal, time);
         }
 
         //CRUD operation - read: searches a path with the number in the robot queue
@@ -101,18 +122,6 @@ class path_database
                 ROS_INFO("updating the path.");
                 updatePath(robot_id, path_id);
             }
-        }
-
-        //path with time and id
-        bool planPathIDTimeStartGoal(int robot_id, float start_time, geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal)
-        {
-            path_database_[robot_id].push_back(planPath(start, goal));
-            if(path_database_[robot_id].back().poses.size()==0)
-            {
-                ROS_ERROR("Path is empty.(planPathIDTimeStartGoal)");
-                return false;
-            }
-            return true;
         }
 
         //random path generator on a random resource with a random start and goal position
@@ -219,6 +228,19 @@ class path_database
             return true;
         }
 
+        //Checks where a new path has to be inserted to secure the chronological order
+        //returns the correct position for the new path at the transferred time
+        int checkPosition(int robot_id, float start_time)
+        {
+            for (int i = 0; i < path_database_[robot_id].size(); i++)
+            {
+                if(start_time < path_database_[robot_id][i].poses.front().header.stamp.toSec())
+                    return i;
+            }
+            return path_database_[robot_id].size();
+        }
+
+
 
     private:
 
@@ -295,14 +317,18 @@ class path_database
         }
 
         //find the start pose for paths depending on the schedule of the resource
-        geometry_msgs::PoseStamped start_pose_detection(int resource_id, float start_time)
+        geometry_msgs::PoseStamped searchStartPose(int robot_id, float start_time)
         {
-            float chrono_distance;
-            for (int i = 0; i < path_database_[resource_id].size(); i++)
+            geometry_msgs::PoseStamped start;
+            int position = checkPosition(robot_id, start_time);
+            if(path_database_[robot_id].empty() || position==0)
             {
-                
+                start.pose.position.x = 0;
+                start.pose.position.y = robot_id; 
+            } else {
+                start = path_database_[robot_id][position - 1].poses.back();
             }
-             
+            return start;
         }
 
         //priority distribution - criteria are availability and number
@@ -310,8 +336,8 @@ class path_database
         {
             for (int i = 0; i < number_robots_; i++)
             {
-                checkAvailability(i, start_time);
-                return i;
+                if(checkAvailability(i, start_time))
+                    return i;
             }
             return -1;
             
@@ -331,6 +357,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
     path_database pdb(3);
+    /*
     for (int i = 0; i < 10; i++)
     {
         if(pdb.randomTestPath(1))
@@ -355,9 +382,16 @@ int main(int argc, char **argv)
         ROS_INFO("available at %d? %d", pdb.checkAvailability(1, i*100), i*100);
     }
 
-    geometry_msgs::PoseStamped goal;
-    pdb.createPath(goal, 1000);
+    ROS_INFO("position at 500 %d",pdb.checkPosition(1, 500));
+    ROS_INFO("position at 1000 %d",pdb.checkPosition(1, 1000));
+    */
+
+    for (int i = 0; i < 10; i++)
+    {
+        pdb.createPathTest();
+    }
     
+    pdb.searchPath();
 
     //ros::spin();
 
