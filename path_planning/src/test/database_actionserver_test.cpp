@@ -46,11 +46,16 @@ class path_database
             ROS_INFO("position %d", position);
             path = newPath(start, goal, start_time);
             if(path.poses.empty())
-                return false;
-            path_database_[robot_id].insert(path_database_[robot_id].begin() + position, path);
-            if(path_database_[robot_id].size() > position)
             {
-                 return updatePath(robot_id, position);
+                ROS_ERROR("Empty path!");
+                return false;
+            }
+            path_database_[robot_id].insert(path_database_[robot_id].begin() + position, path);
+            //just update the path if there is a path behind the one inserted/edited
+            if(path_database_[robot_id].size() > position+1)
+            {
+                ROS_INFO("update the path");
+                 return updatePath(robot_id, position+1);
             }
             return true;
         }
@@ -58,36 +63,36 @@ class path_database
         bool createPathTest()
         {
             srand(time(NULL));
-            float time = rand() % 2000;
+            float time = rand() % 1000;
             geometry_msgs::PoseStamped goal = random_pose_stamped();
             return createPath(goal, time);
         }
 
         //CRUD operation - read: searches a path with the number in the robot queue
-        void searchPath(int robot_id, int path_id)
+        void readPath(int robot_id, int path_id)
         {
                     ROS_INFO("Robot %u Path %u Start [x] %.2lf [y] %.2lf Goal [x] %.2lf [y] %.2lf Size %4u [start_time] %4.2lf [end_time] %4.2lf",
                      robot_id, path_id, path_database_[robot_id][path_id].poses.front().pose.position.x, path_database_[robot_id][path_id].poses.front().pose.position.y, path_database_[robot_id][path_id].poses.back().pose.position.x, path_database_[robot_id][path_id].poses.back().pose.position.y, path_database_[robot_id][path_id].poses.size(), path_database_[robot_id][path_id].poses.front().header.stamp.toSec(), path_database_[robot_id][path_id].poses.back().header.stamp.toSec());
         }
 
         //CRUD operation - read: Writes the path queue for one robot
-        void searchPath(int robot_id)
+        void readPath(int robot_id)
         {
             for (int i = 0; i < path_database_[robot_id].size(); i++)
             {
-                searchPath(robot_id, i);
+                readPath(robot_id, i);
             }
             
         }
 
         //CRUD operation - read: Display the whole schedule for all robots
-        void searchPath()
+        void readPath()
         {
             for (int i = 0; i < number_robots_; i++)
             {
                 for (int j = 0; j < path_database_[i].size(); j++)
                 {
-                    searchPath(i, j);
+                    readPath(i, j);
                 }   
             }
         }
@@ -124,7 +129,7 @@ class path_database
             }
         }
 
-        //random path generator on a random resource with a random start and goal position
+        //old test code
         bool randomTestPath()
         {
             geometry_msgs::PoseStamped start, goal;
@@ -170,7 +175,7 @@ class path_database
             return false;
         }
 
-        //random path generator on a defined resource with a random start and goal position
+        //old test code
         bool randomTestPath(int robot_id)
         {
             geometry_msgs::PoseStamped start, goal;
@@ -214,6 +219,7 @@ class path_database
             return false;
         }
 
+        //checks wether robot_id is free at start_time or not
         bool checkAvailability(int robot_id, float time)
         {
             for (int i = 0; i < path_database_[robot_id].size(); i++)
@@ -362,7 +368,7 @@ int main(int argc, char **argv)
     {
         if(pdb.randomTestPath(1))
         {
-            pdb.searchPath();
+            pdb.readPath();
             ROS_INFO("Sucess!");
         }
         else
@@ -372,9 +378,9 @@ int main(int argc, char **argv)
     }
 
     pdb.deletePath(1, 0);
-    pdb.searchPath();
+    pdb.readPath();
     pdb.deletePath(1, 3);
-    pdb.searchPath();
+    pdb.readPath();
 
     
     for (int i = 0; i < 20; i++)
@@ -389,9 +395,10 @@ int main(int argc, char **argv)
     for (int i = 0; i < 10; i++)
     {
         pdb.createPathTest();
+        pdb.readPath();
     }
     
-    pdb.searchPath();
+    
 
     //ros::spin();
 
