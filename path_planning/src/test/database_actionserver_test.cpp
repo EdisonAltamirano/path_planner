@@ -37,6 +37,11 @@ class path_database
         bool createPath(geometry_msgs::PoseStamped goal, float start_time)
         {
             int position, robot_id = checkPriority(goal, start_time);
+            if(robot_id == -1)
+            {
+                ROS_ERROR("All resources busy!");
+                return false;
+            }
             geometry_msgs::PoseStamped start;
             nav_msgs::Path path;
             ROS_INFO("which resource should take the task %d", robot_id);
@@ -124,7 +129,7 @@ class path_database
             path_database_[robot_id].erase(path_database_[robot_id].begin() + path_id);
             if(path_database_[robot_id].size() >= path_id)
             {
-                ROS_INFO("updating the path.");
+                ROS_INFO("Updating the path.");
                 updatePath(robot_id, path_id);
             }
         }
@@ -224,11 +229,8 @@ class path_database
         {
             for (int i = 0; i < path_database_[robot_id].size(); i++)
             {
-                //time is between last pose of i-1 and first pose of i -> available
-                if(time < path_database_[robot_id][i].poses.front().header.stamp.toSec())
-                    return true;
-                //time is between the start and end of the focused path -> not available
-                if(time > path_database_[robot_id][i].poses.front().header.stamp.toSec() && time < path_database_[robot_id][i].poses.back().header.stamp.toSec())
+                //time is between the start and end of path i -> not available
+                if(time >= path_database_[robot_id][i].poses.front().header.stamp.toSec() && time <= path_database_[robot_id][i].poses.back().header.stamp.toSec())
                     return false;
             }
             return true;
@@ -398,10 +400,22 @@ int main(int argc, char **argv)
         pdb.readPath();
     }
     
+    // -- TEST DRIVEN DEVELOPMENT --
+    //TEST 1 START TIME CHECK                                                                         Expected Output:
+    //1.1 Adding a path to the db in a free start time stamp                                          Path is added to the db of the first robot and db sends whole database 
+    //1.2 Adding a path to the db in a occupied start time stamp but another robot is available       
+    //1.3 Adding a path to the db in a occupied start time stamp and all robots are busy
     
+    //TEST 2 END TIME CHECK
+    //2.1 Adding a path to the db in a free end time stamp
+    //2.2 Adding a path to the db in a occupied end time stamp but another robot is available
+    //2.3 Adding a path to the db in a occupied end time stamp and all robots are busy
+
+    //TEST 3 TIME BASE
+    //Declare a time base independent of the real time
+    //-- END TEST CASES -- 
 
     //ros::spin();
 
     return 0;
 }
-
