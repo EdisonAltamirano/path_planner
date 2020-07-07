@@ -6,15 +6,58 @@ turn around of robots is not in the calculation
 plan list in rqt: time is wrong
 
 1. Path Planning System with different approaches
-1.1 PPS with waiting
-1.2 PPS with drive around
-1.1.1 Components
-1.1.1.1 Database
-1.1.1.2 Path Planner
-1.1.1.2.1 Native solution: move_base
-1.1.1.2.2 Time constrained path planning
-1.1.1.3 Graphical User Interface
-1.1.2 Development Components
-1.1.2.1 Artificial Clock
-1.1.2.2 Order List Parser
- 
+	1.1 PPS with waiting
+	1.2 PPS with drive around
+		1.1.1 Components
+			1.1.1.1 Database
+			1.1.1.2 Path Planner
+				1.1.1.2.1 Native solution: move_base
+				1.1.1.2.2 Time constrained path planning
+			1.1.1.3 Graphical User Interface
+		1.1.2 Development Components
+			1.1.2.1 Artificial Clock
+			1.1.2.2 Order List Parser
+
+Test Driven Development
+
+1. Database
+1.1 Type - nav_msgs/Path
+
+	std_msgs/Header header
+	  uint32 seq
+	  time stamp
+	  string frame_id
+	geometry_msgs/PoseStamped[] poses
+	  std_msgs/Header header
+	    uint32 seq
+	    time stamp
+	    string frame_id
+	  geometry_msgs/Pose pose
+	    geometry_msgs/Point position
+	      float64 x
+	      float64 y
+	      float64 z
+	    geometry_msgs/Quaternion orientation
+	      float64 x
+	      float64 y
+	      float64 z
+	      float64 w
+
+1.2 Arrays
+	1.2.1 Order
+	1.2.2 Consistency
+1.4 CRUD
+	1.4.1 Create
+		1.4.1.1 Create one path for one random robot at a random time and random start/end poses
+		1.4.1.2 Create one path for every robot at a random time and random start/end poses
+		1.4.1.3 Create multiple paths for every robot at a random time and random start end poses
+		1.4.1.4 
+	1.4.2 Read
+		1.4.2.1 Read the whole database
+		1.4.2.2 Read the db for one robot
+		1.4.2.3 Read the one path
+		1.4.2.4 Read the paths at time x
+	1.4.3 Update
+	1.4.4 Delete
+
+
