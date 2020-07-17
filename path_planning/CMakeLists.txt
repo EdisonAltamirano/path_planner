@@ -248,5 +248,11 @@ target_link_libraries(database_actionserver_test
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(gtest_prototype src/test/gtest_prototype.cpp)
+  target_link_libraries(gtest_prototype ${catkin_LIBRARIES})
+endif()
+
+
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
