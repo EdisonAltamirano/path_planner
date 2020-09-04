@@ -76,3 +76,5 @@ end Do 3. Sep 11:22:02 CEST 2020
 12:20 - 14:30 Essen mit Björn
 Do 3. Sep 15:34:04 CEST 2020
 end Do 3. Sep 16:46:14 CEST 2020
+Fr 4. Sep 08:49:46 CEST 2020
+end Fr 4. Sep 10:00:40 CEST 2020
