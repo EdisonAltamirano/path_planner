@@ -150,3 +150,4 @@ end Mi 30. Dez 11:20:33 CET 2020
 end Mi 30. Dez 11:20:46 CET 2020
 Do 31. Dez 09:10:24 CET 2020
 end Do 31. Dez 13:10:29 CET 2020
+Mo 4. Jan 8:30 2021
