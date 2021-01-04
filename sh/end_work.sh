@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ~/catkin_ws/src/path_planning_system
 echo "
 
                                      
