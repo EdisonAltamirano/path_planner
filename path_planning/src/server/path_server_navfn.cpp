@@ -1,11 +1,11 @@
 
 #include "ros/ros.h"
-#include "path_planning_system/path_service.h"
+#include "path_planning/path_service.h"
 #include <tf/transform_listener.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <navfn/navfn_ros.h>
 
-bool createPath(path_planning_system::path_service::Request &req, path_planning_system::path_service::Response &res)
+bool createPath(path_planning::path_service::Request &req, path_planning::path_service::Response &res)
 {
     std::vector<geometry_msgs::PoseStamped> plan;
     //costmap

@@ -1,7 +1,7 @@
 #include "ros/ros.h"
-#include "chronos/time_service.h"
+#include "path_planning/time_service.h"
 
-bool stampTime(chronos::time_service::Request &req, chronos::time_service::Response &res){
+bool stampTime(path_planning::time_service::Request &req, path_planning::time_service::Response &res){
 
     //deny a negative velocity as driving backwards is not interesting in this phase
     if(req.average_velocity <= 0){
