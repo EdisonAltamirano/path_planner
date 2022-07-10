@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     ros::Rate           cycle_rate(int(1 / SAMPLE_TIME_S));
     ros::ServiceClient client_server = n.serviceClient<path_planning::path_service>("path_service");
     ros::ServiceClient client_move_base = n.serviceClient<nav_msgs::GetPlan>("/move_base/make_plan");
-    ros::Subscriber newgoal = n.subscribe("newcoordiantes",1000,newgoalcallback);
+    ros::Subscriber newgoal = n.subscribe("newcoordinates",1000,newgoalcallback);
     ros::Subscriber newposition = n.subscribe("/amcl_pose",1000,positioncallback);
     //publisher for rviz
     ros::Publisher path_pub_server = n.advertise<nav_msgs::Path>("path_test_server", 1000);
